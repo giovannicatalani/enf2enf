@@ -1,0 +1,103 @@
+# Common settings
+proj_name: etoe_elasticity
+seed: 42
+logging:
+    log_dir: './experiments/training/'
+
+dataset:
+  name: 'elasticity'  # or 'rae_transonic'
+  root_path: '/scratch/dmsm/gi.catalani/Elasticity/' # adjust path as needed
+  task:   # for airfrans dataset
+  num_points: null  # optional subsampling
+
+encoder_in:
+  logging:
+    checkpoint: true
+    checkpoint_every_n_epochs: 5
+    keep_n_checkpoints: 3
+    log_dir: './experiments/training/'
+
+  seed: 42
+  experiment_dir: 'encoder_in'
+  model:
+    num_hidden: 128
+    num_heads: 2
+    num_layers: 0
+    num_out: 2
+    latent_dim: 8
+    gaussian_window: 0.1
+    num_latents: 9
+    coord_dim: 2
+    spatial_dim: 2
+    embedding_type: 'rff'
+    embedding_freq_multiplier: [0.5,0.5]
+    condition_value_transform: true
+    freeze_lat_pos: true
+    latent_bbox: [[-0.75,0.75], [-0.75,0.75]]  # Set this to the bounding box of your dataset
+    checkpoint_directory: null
+
+  optimizer:
+    learning_rate_enf: 0.0001
+    learning_rate_codes: 0.0
+
+  training:
+    num_inner_steps: 3
+    num_sampled_points: 5000
+    learning_rate_enf: 0.0001
+    learning_rate_meta_sgd: 0.0001
+    learning_rate_codes: 0.0
+    num_epochs: 1500
+    batch_size: 1
+    val_batch_size: 1
+
+  meta:
+    inner_learning_rate_p: 0.0
+    inner_learning_rate_a: 0.5
+    inner_learning_rate_window: 0.0
+    learning_rate_meta_sgd: 0.0001
+
+encoder_out:
+  logging:
+    checkpoint: true
+    checkpoint_every_n_epochs: 5
+    keep_n_checkpoints: 3
+    log_dir: './experiments/training/'
+  seed: 42
+  experiment_dir: 'encoder_out'
+  model:
+    num_hidden: 256
+    num_heads: 2
+    num_layers: 2
+    num_out: 1
+    latent_dim: 8
+    gaussian_window: 0.1
+    num_latents: 9
+    coord_dim: 2
+    spatial_dim: 2
+    embedding_type: 'rff'
+    embedding_freq_multiplier: [0.1,0.1]
+    condition_value_transform: true
+    freeze_lat_pos: true
+    latent_bbox: [[-0.75,0.75], [-0.75,0.75]] # Set this to the bounding box of your dataset
+    checkpoint_directory: null
+
+  optimizer:
+    learning_rate_enf: 0.0001
+    learning_rate_codes: 0.0
+
+  training:
+    num_inner_steps: 3
+    num_sampled_points: 5000
+    learning_rate_enf: 0.0001
+    learning_rate_meta_sgd: 0.0001
+    learning_rate_codes: 0.0
+    num_epochs: 2500
+    batch_size: 1
+    val_batch_size: 1
+
+  meta:
+    inner_learning_rate_p: 0.0
+    inner_learning_rate_a: 0.5
+    inner_learning_rate_window: 0.0
+    learning_rate_meta_sgd: 0.0001
+
