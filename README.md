@@ -6,7 +6,7 @@ This repository contains the implementation of enf2enf, a neural operator approa
 
 Our architecture leverages equivariant neural fields to learn PDE solutions across different domains. The network processes geometric features and produces accurate field predictions while maintaining equivariance properties.
 
-![Architecture Overview](figures/architecture_skectch_v4.pdf)
+![Architecture Overview](figures/architecture_skectch_v4-1.png)
 
 ## Experiments
 
@@ -14,7 +14,7 @@ Our architecture leverages equivariant neural fields to learn PDE solutions acro
 
 The model learns deformation fields in elastic materials,
 
-![Stress Plots](figures/results_elasticity.pdf)
+![Stress Plots](figures/results_elasticity-1.png)
 
 ```bash
 python elasticity.py
@@ -23,7 +23,7 @@ python elasticity.py
 ### Airfrans Dataset
 
 For airfoil simulations, we use the AirFRANS dataset to predict flow fields around airfoils at different angles of attack and flow conditions. To run experiments:
-![Pressure Distributions](figures/comparison_sample_81_-0.7650_92.7220.pdf)
+![Pressure Distributions](figures/comparison_sample_81_-0.7650_92.7220-1.png)
 
 ```bash
 python airfrans_full.py
