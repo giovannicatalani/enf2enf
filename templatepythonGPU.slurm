@@ -21,4 +21,5 @@ source activate py311_gdl
 
 ##### launch your program #####
 #python elasticity.py
-python airfrans_full.py
+#python airfrans_full.py
+python multi_element_airfoil.py

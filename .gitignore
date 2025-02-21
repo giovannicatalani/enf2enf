@@ -2,3 +2,7 @@
 *.out
 outputs/*
 experiments/*
+*.npy
+**/functa_results/*
+*.slurm
+**/wandb/*

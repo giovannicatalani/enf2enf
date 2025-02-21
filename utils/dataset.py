@@ -411,6 +411,96 @@ class ElasticityDataset:
         else:
             return {'mean': self.xy_mean, 'std': self.xy_std}
         
+class MultiElementAirfoilDataset:
+    def __init__(self, variants, is_train=True, coef_norm=None, num_points=None):
+        """
+        Args:
+            variants: Dictionary from generate_variants() where each key maps to a dict with:
+                - "points": (M,2) numpy array of positions.
+                - "sdf": (M,) numpy array of SDF values.
+                - Optionally, other fields (e.g. 'cond').
+            is_train: If True, compute normalization parameters from the variants.
+            coef_norm: If is_train is False, provide normalization parameters.
+            num_points: If provided, subsample each variant to this many points.
+        """
+        self.variants = variants
+        self.num_points = num_points
+        self.is_train = is_train
+
+        if self.is_train:
+            self.coef_norm = self.compute_norm_params(variants)
+        else:
+            if coef_norm is None:
+                raise ValueError("coef_norm must be provided for non-training data.")
+            self.coef_norm = coef_norm
+
+        self.dataset = self.process_variants(variants)
+
+    def compute_norm_params(self, variants):
+        """Compute normalization parameters from the training variants."""
+        all_positions = np.vstack([variants[k]['points'] for k in variants])
+        all_sdf = np.hstack([variants[k]['sdf'] for k in variants])
+        pos_norm = {
+            'min': all_positions.min(axis=0),
+            'max': all_positions.max(axis=0)
+        }
+        sdf_mean = all_sdf.mean()
+        sdf_std = all_sdf.std()
+        if sdf_std == 0:
+            sdf_std = 1.0
+        coef_norm = {'pos_norm': pos_norm, 'mean': sdf_mean, 'std': sdf_std}
+        print("Normalization parameters computed:")
+        print(f"  pos min: {pos_norm['min']}, pos max: {pos_norm['max']}")
+        print(f"  SDF mean: {sdf_mean}, SDF std: {sdf_std}")
+        return coef_norm
+
+    def process_variants(self, variants):
+        """Process each variant: normalize positions to [-1,1] and SDF to zero mean/unit std.
+           Also remove any rows with non-finite values.
+        """
+        dataset_list = []
+        pos_min = self.coef_norm['pos_norm']['min']
+        pos_max = self.coef_norm['pos_norm']['max']
+        sdf_mean = self.coef_norm['mean']
+        sdf_std = self.coef_norm['std']
+        pos_range = pos_max - pos_min
+        pos_range[pos_range == 0] = 1.0  # Avoid division by zero
+
+        for key in variants:
+            variant = variants[key]
+            pts = variant['points']  # (M,2)
+            sdf = variant['sdf']     # (M,)
+            # Normalize positions to [-1, 1]
+            pts_norm = 2 * (pts - pos_min) / pos_range - 1
+            # Normalize sdf to zero mean, unit std
+            sdf_norm = (sdf - sdf_mean) / sdf_std
+            # Remove rows with any non-finite values
+            mask = np.isfinite(pts_norm).all(axis=1) & np.isfinite(sdf_norm)
+            pts_norm = pts_norm[mask]
+            sdf_norm = sdf_norm[mask]
+            # Subsample if necessary
+            if self.num_points is not None and pts_norm.shape[0] > self.num_points:
+                idx = np.random.choice(pts_norm.shape[0], self.num_points, replace=False)
+                pts_norm = pts_norm[idx]
+                sdf_norm = sdf_norm[idx]
+            # Create dictionary entry; here input is set equal to pos (customize if needed)
+            entry = {
+                'pos': pts_norm,
+                'input': pts_norm,
+                'output': sdf_norm.reshape(-1, 1)
+            }
+            # Optionally include conditional information if present
+            if 'cond' in variant:
+                entry['cond'] = variant['cond']
+            dataset_list.append(entry)
+        return dataset_list
+
+    def __getitem__(self, index):
+        return self.dataset[index]
+
+    def __len__(self):
+        return len(self.dataset)
+        
 
 
 class JAXDataLoader:
@@ -509,9 +599,29 @@ def setup_datasets(cfg, num_points=100000):
             'pressure': (train_dataset_p, test_dataset_p),
             'geometry': (train_dataset_g, test_dataset_g)
         }
+    
+    elif cfg.dataset.name == 'multielement_airfoil':
+        
+        variants = np.load(cfg.dataset.root_path + "/geom_db.npy", allow_pickle=True).item()
+        print(f"Loaded {len(variants)} variants.")
+        
+        # Split the variants into training (80%) and test (20%) sets
+        variant_keys = list(variants.keys())
+        np.random.shuffle(variant_keys)
+        split = int(0.8 * len(variant_keys))
+        train_keys = variant_keys[:split]
+        test_keys = variant_keys[split:]
+        train_variants = {k: variants[k] for k in train_keys}
+        test_variants = {k: variants[k] for k in test_keys}
+        
+        # Create the dataset objects (lists of dictionaries)
+        train_dataset = MultiElementAirfoilDataset(train_variants, is_train=True)
+        test_dataset = MultiElementAirfoilDataset(test_variants, is_train=False, coef_norm=train_dataset.coef_norm)
+        
+        return {'sdf': (train_dataset, test_dataset)}
         
     else:
-        raise ValueError(f"Unknown dataset name: {cfg.dataset.name}. Expected 'elasticity' or 'airfrans'")
+        raise ValueError(f"Unknown dataset name: {cfg.dataset.name}. Expected 'elasticity' or 'airfrans' or 'multielement_airfoil'.")
     
     
 class OutputLatentDataset:

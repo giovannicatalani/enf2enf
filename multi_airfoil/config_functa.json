@@ -1,0 +1,54 @@
+{   "output_dir": "/home/dmsm/gi.catalani/Projects/enf2enf/multi_airfoil/",
+
+    "dataset": {
+        "root_path": null,
+        "task": null
+    },
+
+    "optim": {
+        "batch_size": 16,
+        "batch_size_val": null,
+        "lr_inr": 5e-06,
+        "gamma_step": 0.9,
+        "lr_code": 0.01,
+        "meta_lr_code": 5e-05,
+        "weight_decay_code": 0,
+        "inner_steps": 3,
+        "test_inner_steps": 3,
+        "epochs": 1000,
+        "lr_mlp": 0.001,
+        "weight_decay_mlp": 0,
+        "num_points": 10000
+    },
+    
+"inr_in": {
+        "model_type": "fourier_features",
+        "target_field": "implicit_distance",
+        "task": "full",
+        "input_dim": 2,
+        "output_dim": 1,
+        "latent_dim": 32,
+        "depth": 5,
+        "hidden_dim": 256,
+        "activation":"relu",
+        "w0": null,
+        "use_latent": true,
+        "modulate_scale": false,
+        "modulate_shift": true,
+        "hypernet_depth": 1,
+        "hypernet_width": 128,
+        "frequency_embedding": "gaussian",
+        "include_input": true,
+        "scale": 0.5,
+        "num_frequencies": 32,
+        "max_frequencies": 8,
+        "base_frequency": 1.25,
+        "last_activation": null,
+        "loss_type": "mse",
+        "add_cond_in": false,
+        "add_sdf_in": false,
+        "global_norm": false,
+        "is_input": true
+    }
+}
+ 
