@@ -1,4 +1,4 @@
-# Equivariant Neural Field Networks for PDE Solutions
+# Equivariant Neural Field Networks for steady on general geometries.
 
 This repository contains the implementation of enf2enf, a neural operator approach to solve steady state PDEs on general geometries.
 The code can be ued to reproduce the experiments described in the paper **Geometry aware inference of steady state PDEs
