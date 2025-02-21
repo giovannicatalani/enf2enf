@@ -2,6 +2,7 @@ import jax.numpy as jnp
 from flax import linen as nn
 from functools import partial
 
+#Code adapted from original implementation of ENFs implementation https://github.com/david-knigge/enf-pde/tree/main
 
 def init_positions_grid(rng, shape, spatial_dims=None, bbox=None):
     """

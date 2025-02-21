@@ -9,6 +9,7 @@ from flax import linen as nn
 from enf.steerable_attention.invariant._base_invariant import BaseInvariant
 from enf.steerable_attention.equivariant_cross_attention import EquivariantCrossAttention, PointwiseFFN
 
+#Code adapted from original implementation of ENFs implementation https://github.com/david-knigge/enf-pde/tree/main
 
 class EquivariantCrossAttentionBlock(nn.Module):
     """ Cross attention layer for the latent points, conditioned on the poses.
