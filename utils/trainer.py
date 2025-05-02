@@ -505,6 +505,9 @@ class MetaSGDSteadyStateTrainer:
         # Initialize outer autodecoder parameters
         outer_params = self.outer_autodecoder.init(outer_key)
         p, a, window = self.outer_autodecoder.apply(outer_params)
+        
+        print(f"Outer autodecoder initialized with p shape: {p.shape}, a shape: {a.shape}, window shape: {window.shape}")
+        print(f'Window: {window}')
 
         # Initialize meta-SGD learning rates
         meta_sgd_lrs = {
